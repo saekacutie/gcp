@@ -1,11 +1,11 @@
-import os, sys, subprocess, time, json, re, curses, requests
+import os, sys, subprocess, time, json, re, curses, getpass, requests
 from urllib.parse import unquote
 
 # ==========================================
 # MASTER CONFIGURATION
 # ==========================================
-PASSWORD = "saeka"
-PATH = "/prvtspyyy404"
+PASSWORD = os.environ.get("PRVTSPYYY_PASSWORD") or getpass.getpass("SSH password: ")
+WS_PATH = "/prvtspyyy404"
 ANIM_FRAMES = ['◜','◠','◝','◞','◡','◟']
 
 class Commander:
@@ -123,7 +123,7 @@ class Commander:
         self.stdscr.addstr("\n── GCP CLOUDRUN OUTPUT ──\n", curses.color_pair(1) | curses.A_BOLD)
         self.stdscr.addstr(f"SERVICE: {svc}\nURL: https://{svc}.run.app\n", curses.color_pair(4))
         self.stdscr.addstr("\n── VPN TUNNEL SSH CONFIG ──\n", curses.color_pair(1) | curses.A_BOLD)
-        self.stdscr.addstr(f"ADDRESS: [Cloud-IP]\nPORT: 443\nUSER: trojan\nPASS: {PASSWORD}\nHOST: {dom}\nSNI: {dom}\nPATH: {PATH}\n", curses.color_pair(4))
+        self.stdscr.addstr(f"ADDRESS: [Cloud-IP]\nPORT: 443\nUSER: trojan\nPASS: {PASSWORD}\nHOST: {dom}\nSNI: {dom}\nPATH: {WS_PATH}\n", curses.color_pair(4))
         self.stdscr.addstr("\nPRESS ANY KEY TO RETURN", curses.color_pair(3)); self.stdscr.getch()
 
     def check_status(self):
@@ -136,7 +136,7 @@ class Commander:
             r = requests.get(url, timeout=5)
             ms = int((time.time() - start_t) * 1000)
             self.stdscr.addstr(f"\nSTATUS: ONLINE\nLATENCY: {ms}ms\n", curses.color_pair(1))
-            r_sec = requests.get(url + PATH, timeout=5)
+            r_sec = requests.get(url + WS_PATH, timeout=5)
             # Verify if the stealth path is hidden via 404
             stealth = "ACTIVE (404)" if r_sec.status_code == 404 else "EXPOSED"
             self.stdscr.addstr(f"STEALTH MODE: {stealth}\n", curses.color_pair(1 if "ACTIVE" in stealth else 2))
@@ -149,7 +149,7 @@ class Commander:
         self.stdscr.addstr("OPERATIONAL MANUAL\n", curses.color_pair(3) | curses.A_BOLD)
         instr = [
             ("\n1. DEPLOYMENT:", "Paste Qwiklabs link. Use 8GB/16GB for stability."),
-            ("\n2. VPN SETUP:", f"WebSocket Tunnel. Path: {PATH} | Pass: {PASSWORD}"),
+            ("\n2. VPN SETUP:", f"WebSocket Tunnel. Path: {WS_PATH} | Pass: {PASSWORD}"),
             ("\n3. SNI MASKING:", "Match Domain to a real site for stealth."),
             ("\n4. STABILITY:", "Auto-Ping keeps the Cloud Run container awake.")
         ]
